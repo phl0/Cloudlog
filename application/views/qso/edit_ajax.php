@@ -491,6 +491,14 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        <div class="form-group row">
+                                        <label for="email" class="col-sm-2 col-form-label"><?php echo $this->lang->line('general_word_email'); ?></label>
+                                            <div class="col-sm-10">
+                                                <input type="text" id="email" class="form-control" name="email" value="<?php echo $qso->COL_EMAIL; ?>" />
+                                            </div>
+                                        </div>
+
                                     </div>
 
                                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">

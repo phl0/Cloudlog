@@ -96,6 +96,7 @@ class Qrz {
                 $data['state'] = null;
                 $data['us_county'] = null;
             }
+            $data['email'] = (string)$xml->Callsign->email;
         } finally {
 
             return $data;

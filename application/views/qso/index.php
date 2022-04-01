@@ -472,6 +472,13 @@
               </div>
             </div>
 
+            <div class="form-group row">
+              <label for="email" class="col-sm-2 col-form-label"><?php echo $this->lang->line('general_word_email'); ?></label>
+              <div class="col-sm-10">
+                <input type="text" id="email" class="form-control" name="email" value="" />
+              </div>
+            </div>
+
             <div class="alert alert-info" role="alert">
               <span class="badge badge-info"><?php echo $this->lang->line('general_word_info'); ?></span> <?php echo $this->lang->line('qsl_notes_helptext'); ?>
             </div>

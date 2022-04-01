@@ -441,6 +441,10 @@ $("#callsign").focusout(function() {
 					$('#qth').val(result.callsign_qth);
 				}
 
+				if($('#email').val() == "") {
+					$('#email').val(result.callsign_email);
+				}
+
 				/*
 				* Update state with returned value
 				*/

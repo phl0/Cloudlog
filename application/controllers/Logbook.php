@@ -119,6 +119,7 @@ class Logbook extends CI_Controller {
 			"callsign_name" => "",
 			"callsign_qra"  => "",
 			"callsign_qth"  => "",
+			"callsign_email"  => "",
 			"callsign_iota" => "",
 			"callsign_state" => "",
 			"callsign_us_county" => "",
@@ -143,6 +144,7 @@ class Logbook extends CI_Controller {
 			$return['callsign_name'] =  $this->logbook_model->call_name($callsign);
 			$return['callsign_qra'] = $this->logbook_model->call_qra($callsign);
 			$return['callsign_qth'] = $this->logbook_model->call_qth($callsign);
+			$return['callsign_email'] = $this->logbook_model->call_email($callsign);
 			$return['callsign_iota'] = $this->logbook_model->call_iota($callsign);
 			$return['qsl_manager'] = $this->logbook_model->call_qslvia($callsign);
 			$return['callsign_state'] = $this->logbook_model->call_state($callsign);
@@ -164,6 +166,7 @@ class Logbook extends CI_Controller {
 			$return['callsign_name'] = $callbook['name'];
 			$return['callsign_qra'] = $callbook['gridsquare'];
 			$return['callsign_qth'] = $callbook['city'];
+			$return['callsign_email'] = $callbook['email'];
 			$return['callsign_iota'] = $callbook['iota'];
 			$return['callsign_state'] = $callbook['state'];
 			$return['callsign_us_county'] = $callbook['us_county'];

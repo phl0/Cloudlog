@@ -180,7 +180,8 @@ class Logbook_model extends CI_Model {
             'COL_SIG' => trim($this->input->post('sig')),
             'COL_SIG_INFO' => trim($this->input->post('sig_info')),
             'COL_DARC_DOK' => trim($darc_dok),
-			'COL_NOTES' => $this->input->post('notes'),
+            'COL_NOTES' => $this->input->post('notes'),
+            'COL_EMAIL' => $this->input->post('email'),
     );
 
     $station_id = $this->input->post('station_profile');
@@ -667,7 +668,8 @@ class Logbook_model extends CI_Model {
        'station_id' => $stationId,
        'COL_OPERATOR' => $this->input->post('operator_callsign'),
        'COL_STATE' =>$this->input->post('usa_state'),
-       'COL_CNTY' => $uscounty
+       'COL_CNTY' => $uscounty,
+       'COL_EMAIL' => $this->input->post('email')
     );
 
     if ($this->exists_qrz_api_key($data['station_id'])) {
