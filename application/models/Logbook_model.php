@@ -463,6 +463,30 @@ class Logbook_model extends CI_Model {
 			}
 		}
 	}
+
+    // Send QSL via email
+    if ($data['COL_EMAIL'] != "") {
+       $this->load->library('email');
+       $config = Array(
+          'protocol' => $this->optionslib->get_option('emailProtocol'),
+          'smtp_host' => $this->optionslib->get_option('smtpHost'),
+          'smtp_port' => $this->optionslib->get_option('smtpPort'),
+          'smtp_user' => $this->optionslib->get_option('smtpUsername'),
+          'smtp_pass' => $this->optionslib->get_option('smtpPassword'),
+          'crlf' => "\r\n",
+          'newline' => "\r\n"
+       );
+
+       $this->email->initialize($config);
+
+       $this->email->from('cloudlog@df2et.de', 'Cloudlog');
+       $this->email->to($data['COL_EMAIL']);
+
+       $this->email->subject('Email QSL from '.$data['COL_CALL']);
+       $this->email->message("This confirms our 2-way QSO with following details.");
+
+       $this->email->send();
+    }
   }
 
   /*
