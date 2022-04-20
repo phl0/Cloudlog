@@ -479,11 +479,13 @@ class Logbook_model extends CI_Model {
 
        $this->email->initialize($config);
 
-       $this->email->from('cloudlog@df2et.de', 'Cloudlog');
+       $message = $this->load->view('email/mail_qsl', $data,  TRUE);
+
+       $this->email->from($this->session->userdata('user_email'), $this->session->userdata('user_firstname')." ".$this->session->userdata('user_lastname')." (".$data['COL_STATION_CALLSIGN'].")");
        $this->email->to($data['COL_EMAIL']);
 
-       $this->email->subject('Email QSL from '.$data['COL_CALL']);
-       $this->email->message("This confirms our 2-way QSO with following details.");
+       $this->email->subject('Email QSL from '.$data['COL_STATION_CALLSIGN']);
+       $this->email->message($message);
 
        $this->email->send();
     }
