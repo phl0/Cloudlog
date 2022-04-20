@@ -56,7 +56,24 @@ function load_was_map() {
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/selectize.js"></script>
 
 <?php if ($this->uri->segment(1) == "station") { ?>
+    <script language="javascript" src="<?php echo base_url() ;?>assets/js/HamGridSquare.js"></script>
     <script src="<?php echo base_url() ;?>assets/js/sections/station_locations.js"></script>
+    <script>
+        var position;
+        function getLocation() {
+            console.log("'clicked");
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else { 
+                console.log('Geolocation is not supported by this browser.');
+            }
+        }
+
+        function showPosition(position) {
+            gridsquare = latLonToGridSquare(position.coords.latitude,position.coords.longitude);
+            document.getElementById("stationGridsquareInput").value = gridsquare;
+  }
+    </script>
 <?php } ?>
 
 <?php if ($this->uri->segment(1) == "logbooks") { ?>
@@ -1072,11 +1089,17 @@ $(document).on('keypress',function(e) {
               "mode": "SSB",
               "satmode": "",
               "satname": "ES'HAIL-2"
+              "power": "20"
+              "prop_mode": "SAT"
           }  */
-          if (data.uplink_freq != "")
+          if (data.prop_mode == "SAT")
+          //if (data.uplink_freq != "")
           {
             $('#frequency').val(data.uplink_freq);
             $("#band").val(frequencyToBand(data.uplink_freq));
+          } else {
+            $('#frequency').val(data.frequency);
+            $("#band").val(frequencyToBand(data.frequency));
           }
           if (data.downlink_freq != "")
           {
@@ -1097,6 +1120,10 @@ $(document).on('keypress',function(e) {
           }
           $("#sat_name").val(data.satname);
           $("#sat_mode").val(data.satmode);
+          if(data.power != 0) {
+            $("#transmit_power").val(data.power);
+          }
+          $("#selectPropagation").val(data.prop_mode);
 
           // Display CAT Timeout warnng based on the figure given in the config file
             var minutes = Math.floor(<?php echo $this->config->item('cat_timeout_interval'); ?> / 60);
@@ -1121,9 +1148,9 @@ $(document).on('keypress',function(e) {
   // If a radios selected from drop down select radio update.
   $('.radios').change(updateFromCAT);
 
-  // If radio isn't SatPC32 clear sat_name and sat_mode
+  // If radio isn't SatPC32 or CloudLogCATQt clear sat_name and sat_mode
   $( ".radios" ).change(function() {
-      if ($(".radios option:selected").text() != "SatPC32") {
+      if ($(".radios option:selected").text() != "SatPC32" && $(".radios option:selected").text() != "CloudLogCATQt") {
         $("#sat_name").val("");
         $("#sat_mode").val("");
         $("#frequency").val("");
@@ -2290,8 +2317,8 @@ function deleteQsl(id) {
                     }
 
                 } else {
-                    $("#qslupload").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\n' +
-                        data.status.front +
+                    $("#qslupload").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Front QSL Card:' +
+                    data.status.front.error +
                         '</div>');
                 }
                 if (data.status.back.status == 'Success') {
@@ -2328,8 +2355,8 @@ function deleteQsl(id) {
                         $("#qslcardback").val(null);
                     }
                 } else {
-                    $("#qslupload").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\n' +
-                        data.status.back +
+                    $("#qslupload").append('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\nBack QSL Card: ' +
+                    data.status.back.error +
                         '</div>');
                 }
             }
@@ -2397,7 +2424,10 @@ function deleteQsl(id) {
 	}
 </script>
 <?php if ($this->uri->segment(1) == "contesting" && $this->uri->segment(2) != "add" ) { ?>
-    <script src="<?php echo base_url() ;?>assets/js/sections/contesting.js"></script>
+    <script>
+        var manual = <?php echo $_GET['manual']; ?>;
+    </script>
+    <script src="<?php echo base_url() ;?>assets/js/sections/contesting.js?v2"></script>
 <?php } ?>
 
 <?php if ($this->uri->segment(1) == "station") { ?>

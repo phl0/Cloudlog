@@ -127,10 +127,13 @@ class Logbook extends CI_Controller {
 			"bearing" 		=> "",
 			"workedBefore" => false,
 			"lotw_member" => $lotw_member,
+			"image" => "",
 		];
 
 		$return['dxcc'] = $this->dxcheck($callsign);
 		$return['partial'] = $this->partial($callsign);
+
+		$callbook = $this->logbook_model->loadCallBook($callsign, $this->config->item('use_fullname'));
 
 		// Do we have local data for the Callsign?
 		if($this->logbook_model->call_name($callsign) != null)
@@ -150,6 +153,17 @@ class Logbook extends CI_Controller {
 			$return['callsign_state'] = $this->logbook_model->call_state($callsign);
 			$return['bearing'] = $this->bearing($return['callsign_qra'], $measurement_base, $station_id);
 			$return['workedBefore'] = $this->worked_grid_before($return['callsign_qra'], $type, $band, $mode);
+			if ($this->session->userdata('user_show_qrz_image')) {
+				if (isset($callbook)) {
+					if ($callbook['image'] == "") {
+						$return['image'] = "n/a";
+					} else {
+						$return['image'] = $callbook['image'];
+					}
+				} else {
+					$return['image'] = "n/a";
+				}
+			}
 
 			if ($return['callsign_qra'] != "") {
 				$return['latlng'] = $this->qralatlng($return['callsign_qra']);
@@ -158,8 +172,6 @@ class Logbook extends CI_Controller {
 			echo json_encode($return, JSON_PRETTY_PRINT);
 			return;
 		}
-
-		$callbook = $this->logbook_model->loadCallBook($callsign, $this->config->item('use_fullname'));
 
 		if (isset($callbook))
 		{
@@ -170,6 +182,13 @@ class Logbook extends CI_Controller {
 			$return['callsign_iota'] = $callbook['iota'];
 			$return['callsign_state'] = $callbook['state'];
 			$return['callsign_us_county'] = $callbook['us_county'];
+			if ($this->session->userdata('user_show_qrz_image')) {
+				if ($callbook['image'] == "") {
+					$return['image'] = "n/a";
+				} else {
+					$return['image'] = $callbook['image'];
+				}
+			}
 
 			if(isset($callbook['qslmgr'])) {
 				$return['qsl_manager'] = $callbook['qslmgr'];
@@ -378,7 +397,44 @@ class Logbook extends CI_Controller {
 				}
 
 				$count++;
+			}elseif($row->COL_VUCC_GRIDS != null) {
 
+				$grids = explode(",", $row->COL_VUCC_GRIDS);
+				if (count($grids) == 2) {
+					$grid1 = $this->qra->qra2latlong(trim($grids[0]));
+					$grid2 = $this->qra->qra2latlong(trim($grids[1]));
+		
+					$coords[]=array('lat' => $grid1[0],'lng'=> $grid1[1]);
+					$coords[]=array('lat' => $grid2[0],'lng'=> $grid2[1]);    
+		
+					$stn_loc = $this->qra->get_midpoint($coords);
+				}
+				if (count($grids) == 4) {
+					$grid1 = $this->qra->qra2latlong(trim($grids[0]));
+					$grid2 = $this->qra->qra2latlong(trim($grids[1]));
+					$grid3 = $this->qra->qra2latlong(trim($grids[2]));
+					$grid4 = $this->qra->qra2latlong(trim($grids[3]));
+		
+					$coords[]=array('lat' => $grid1[0],'lng'=> $grid1[1]);
+					$coords[]=array('lat' => $grid2[0],'lng'=> $grid2[1]);    
+					$coords[]=array('lat' => $grid3[0],'lng'=> $grid3[1]);    
+					$coords[]=array('lat' => $grid4[0],'lng'=> $grid4[1]);    
+		
+					$stn_loc = $this->qra->get_midpoint($coords);
+				}
+
+				if($count != 1) {
+					echo ",";
+				}
+	
+				if($row->COL_SAT_NAME != null) { 
+					echo "{\"lat\":\"".$stn_loc[0]."\",\"lng\":\"".$stn_loc[1]."\", \"html\":\"Callsign: ".$row->COL_CALL."<br />Date/Time: ".$row->COL_TIME_ON."<br />SAT: ".$row->COL_SAT_NAME."<br />Mode: ".$row->COL_MODE."\",\"label\":\"".$row->COL_CALL."\"}";
+				} else {
+				echo "{\"lat\":\"".$stn_loc[0]."\",\"lng\":\"".$stn_loc[1]."\", \"html\":\"Callsign: ".$row->COL_CALL."<br />Date/Time: ".$row->COL_TIME_ON."<br />Band: ".$row->COL_BAND."<br />Mode: ".$row->COL_MODE."\",\"label\":\"".$row->COL_CALL."\"}";
+				}
+	
+				$count++;
+			
 			} else {
 				$query = $this->db->query('
 					SELECT *

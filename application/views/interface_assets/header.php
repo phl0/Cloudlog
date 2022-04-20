@@ -32,9 +32,9 @@
 	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/loading.min.css" />
 	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/ldbtn.min.css" />
 
-      <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/buttons.dataTables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/buttons.dataTables.min.css"/>
 
-  <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/datatables.min.css"/>
+  	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/datatables.min.css"/>
 
  	<?php if ($this->uri->segment(1) == "adif") { ?>
   	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/datepicker.css" />
@@ -68,10 +68,12 @@
 							<a class="dropdown-item" href="<?php echo site_url('qso?manual=0');?>" title="Log Live QSOs">Live QSO</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item" href="<?php echo site_url('qso?manual=1');?>" title="Log QSO made in the past">Post QSO</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="<?php echo site_url('contesting');?>" title="Log contest QSOs">Contest Logging</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="<?php echo site_url('qsl');?>" title="QSL"> View QSL</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="<?php echo site_url('contesting?manual=0');?>" title="Live contest QSOs">Live Contest Logging</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="<?php echo site_url('contesting?manual=1');?>" title="Post contest QSOs">Post Contest Logging</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="<?php echo site_url('qsl');?>" title="QSL"> View QSL</a>
 						</div>
         	</li>
 

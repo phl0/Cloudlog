@@ -28,7 +28,47 @@
 							'uplink_freq' => $result['uplink_freq'],
 							'downlink_mode' => $result['downlink_mode'],
 							'uplink_mode' => $result['uplink_mode'],
+							'prop_mode' => 'SAT',
 						);
+
+						$this->db->where('id', $radio_id);
+						$this->db->where('user_id', $user_id);
+						$this->db->update('cat', $data);
+					}
+				} else if($result['radio'] == "CloudLogCATQt") {
+					// Update the record
+					foreach ($query->result() as $row)
+					{
+						$radio_id = $row->id;
+
+						if ($result['prop_mode'] == "SAT") {
+							$data = array(
+								'sat_name' => $result['sat_name'],
+								'prop_mode' => $result['prop_mode'],
+								'mode' => NULL,
+								'frequency' => NULL,
+								'downlink_freq' => $result['downlink_freq'],
+								'uplink_freq' => $result['uplink_freq'],
+								'downlink_mode' => $result['downlink_mode'],
+								'uplink_mode' => $result['uplink_mode'],
+							);
+							if (isset($result['power'])) {
+								$data['power'] = $result['power'];
+							}
+						} else {
+							$data = array(
+								'prop_mode' => $result['prop_mode'],
+								'mode' => $result['mode'],
+								'frequency' => $result['frequency'],
+								'downlink_freq' => NULL,
+								'downlink_mode' => NULL,
+								'uplink_freq' => NULL,
+								'uplink_mode' => NULL,
+							);
+							if (isset($result['power'])) {
+								$data['power'] = $result['power'];
+							}
+						}
 
 						$this->db->where('id', $radio_id);
 						$this->db->where('user_id', $user_id);
@@ -45,6 +85,10 @@
 						'mode' => $result['mode'],
 						'timestamp' => $timestamp,
 						);
+
+						if (isset($result['power'])) {
+							$data['power'] = $result['power'];
+						}
 
 						$this->db->where('id', $radio_id);
 						$this->db->where('user_id', $user_id);
@@ -64,8 +108,42 @@
 						'uplink_freq' => $result['uplink_freq'],
 						'downlink_mode' => $result['downlink_mode'],
 						'uplink_mode' => $result['uplink_mode'],
+						'prop_mode' => 'SAT',
 						'user_id' => $user_id,
 					);
+				} else if($result['radio'] == "CloudLogCATQt") {
+					if ($result['prop_mode'] == "SAT") {
+						$data = array(
+							'radio' => $result['radio'],
+							'sat_name' => $result['sat_name'],
+							'prop_mode' => $result['prop_mode'],
+							'mode' => NULL,
+							'frequency' => NULL,
+							'downlink_freq' => $result['downlink_freq'],
+							'uplink_freq' => $result['uplink_freq'],
+							'downlink_mode' => $result['downlink_mode'],
+							'uplink_mode' => $result['uplink_mode'],
+							'user_id' => $user_id,
+						);
+						if (isset($result['power'])) {
+							$data['power'] = $result['power'];
+						}
+					} else {
+						$data = array(
+							'radio' => $result['radio'],
+							'prop_mode' => $result['prop_mode'],
+							'mode' => $result['mode'],
+							'frequency' => $result['frequency'],
+							'downlink_freq' => NULL,
+							'downlink_mode' => NULL,
+							'uplink_freq' => NULL,
+							'uplink_mode' => NULL,
+							'user_id' => $user_id,
+						);
+						if (isset($result['power'])) {
+							$data['power'] = $result['power'];
+						}
+					}
 				} else {
 					$data = array(
 						'radio' => $result['radio'],
@@ -74,6 +152,10 @@
 						'timestamp' => $timestamp,
 						'user_id' => $user_id,
 					);
+
+					if (isset($result['power'])) {
+						$data['power'] = $result['power'];
+					}
 				}
 
 				$this->db->insert('cat', $data);

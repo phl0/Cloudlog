@@ -225,7 +225,13 @@
                     <?php if($row->COL_DARC_DOK != null) { ?>
                     <tr>
                         <td><?php echo $this->lang->line('gen_hamradio_dok'); ?></td>
+                        <?php if (preg_match('/^[A-Y]\d{2}$/', $row->COL_DARC_DOK)) { ?>
                         <td><a href="https://www.darc.de/<?php echo $row->COL_DARC_DOK; ?>" target="_blank"><?php echo $row->COL_DARC_DOK; ?></a></td>
+                        <?php } else if (preg_match('/^Z\d{2}$/', $row->COL_DARC_DOK)) { ?>
+                        <td><a href="https://<?php echo $row->COL_DARC_DOK; ?>.vfdb.org" target="_blank"><?php echo $row->COL_DARC_DOK; ?></a></td>
+                        <?php } else { ?>
+                        <td><?php echo $row->COL_DARC_DOK; ?></td>
+                        <?php } ?>
                     </tr>
                     <?php } ?>
 
@@ -433,6 +439,34 @@
         if($stn_loc[0] != 0) {
 		    $lat = $stn_loc[0];
 		    $lng = $stn_loc[1];
+        }
+    } elseif($row->COL_VUCC_GRIDS != null) {
+        $grids = explode(",", $row->COL_VUCC_GRIDS);
+        if (count($grids) == 2) {
+            $grid1 = $this->qra->qra2latlong(trim($grids[0]));
+            $grid2 = $this->qra->qra2latlong(trim($grids[1]));
+
+            $coords[]=array('lat' => $grid1[0],'lng'=> $grid1[1]);
+            $coords[]=array('lat' => $grid2[0],'lng'=> $grid2[1]);    
+
+            $midpoint = $this->qra->get_midpoint($coords);
+            $lat = $midpoint[0];
+		    $lng = $midpoint[1];
+        }
+        if (count($grids) == 4) {
+            $grid1 = $this->qra->qra2latlong(trim($grids[0]));
+            $grid2 = $this->qra->qra2latlong(trim($grids[1]));
+            $grid3 = $this->qra->qra2latlong(trim($grids[2]));
+            $grid4 = $this->qra->qra2latlong(trim($grids[3]));
+
+            $coords[]=array('lat' => $grid1[0],'lng'=> $grid1[1]);
+            $coords[]=array('lat' => $grid2[0],'lng'=> $grid2[1]);    
+            $coords[]=array('lat' => $grid3[0],'lng'=> $grid3[1]);    
+            $coords[]=array('lat' => $grid4[0],'lng'=> $grid4[1]);    
+
+            $midpoint = $this->qra->get_midpoint($coords);
+            $lat = $midpoint[0];
+		    $lng = $midpoint[1];
         }
 	} else {
 

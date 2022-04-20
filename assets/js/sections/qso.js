@@ -279,12 +279,17 @@ function reset_fields() {
 	$('#callsign_info').removeClass("badge-secondary");
 	$('#callsign_info').removeClass("badge-success");
 	$('#callsign_info').removeClass("badge-danger");
+	$('#callsign-image').attr('style', 'display: none;');
+	$('#callsign-image-content').text("");
 	$('#qsl_via').val("");
 	$('#callsign_info').text("");
 	$('#input_usa_state').val("");
 	$('#email').val("");
 	$('#qso-last-table').show();
 	$('#partial_view').hide();
+	var $select = $('#darc_dok').selectize();
+	var selectize = $select[0].selectize;
+	selectize.clear();
 
 	mymap.setView(pos, 12);
 	mymap.removeLayer(markers);
@@ -376,6 +381,19 @@ $("#callsign").focusout(function() {
 				$('#hamqth_info').html('<a target="_blank" href="https://www.hamqth.com/'+find_callsign+'"><img width="32" height="32" src="'+base_url+'images/icons/hamqth.com.png"></a>'); 
 				$('#hamqth_info').attr('title', 'Lookup '+find_callsign+' info on hamqth.com');
 
+				var $select = $('#darc_dok').selectize();
+				var selectize = $select[0].selectize;
+				if (result.dxcc.adif == '230') {
+					$.get('lookup/dok/' + $('#callsign').val().toUpperCase(), function(result) {
+						if (result) {
+							selectize.addOption({name: result});
+							selectize.setValue(result, false);
+						}
+					});
+				} else {
+					selectize.clear();
+				}
+
 				$('#dxcc_id').val(result.dxcc.adif);
 				$('#cqz').val(result.dxcc.cqz);
 				$('#ituz').val(result.dxcc.ituz);
@@ -444,6 +462,10 @@ $("#callsign").focusout(function() {
 
 				if($('#email').val() == "") {
 					$('#email').val(result.callsign_email);
+				/* Find link to qrz.com picture */
+				if (result.image != "n/a") {
+					$('#callsign-image-content').html('<img class="callsign-image-pic" src="'+result.image+'">');
+					$('#callsign-image').attr('style', 'display: true;');
 				}
 
 				/*
