@@ -462,6 +462,8 @@ $("#callsign").focusout(function() {
 
 				if($('#email').val() == "") {
 					$('#email').val(result.callsign_email);
+				}
+
 				/* Find link to qrz.com picture */
 				if (result.image != "n/a") {
 					$('#callsign-image-content').html('<img class="callsign-image-pic" src="'+result.image+'">');
