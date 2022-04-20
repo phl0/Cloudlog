@@ -12,12 +12,23 @@ Dear <?php echo $COL_NAME == "" ? "YL/OM" : $COL_NAME; ?>,
 
 this confirms our 2-way QSO with the following details:
 
-To:   <?php echo $COL_CALL."\n"; ?>
+To: <?php echo $COL_CALL."\n"; ?>
 Date: <?php $timestamp = strtotime($COL_TIME_ON); echo date($custom_date_format, $timestamp)."\n"; ?>
 Time: <?php $timestamp = strtotime($COL_TIME_ON); echo date("H:i", $timestamp)."\n"; ?>
 Band: <?php echo $COL_BAND."\n"; ?>
+Frequency: <?php echo $this->frequency->hz_to_mhz($COL_FREQ)."\n"; ?>
 Mode: <?php echo $COL_MODE."\n"; ?>
-Rprt: <?php echo $COL_RST_SENT."\n"; ?>
+Report: <?php echo $COL_RST_SENT."\n"; ?>
+<?php
+if ($COL_PROP_MODE != "") {
+   echo "Propagation Mode: ".$COL_PROP_MODE."\n";
+   if ($COL_PROP_MODE == "SAT") {
+      echo "Satellite: ".$COL_SAT_NAME."\n";
+      echo "RX Band: ".$COL_BAND_RX."\n";
+      echo "RX Frequency: ".$this->frequency->hz_to_mhz($COL_FREQ_RX)."\n";
+   }
+}
+?>
 
    vy73 de <?php echo $COL_STATION_CALLSIGN; ?>
 
@@ -26,7 +37,8 @@ Rprt: <?php echo $COL_RST_SENT."\n"; ?>
 Loc:  <?php echo $COL_MY_GRIDSQUARE."\n"; ?>
 CQ:   <?php echo $COL_MY_CQ_ZONE."\n"; ?>
 ITU:  <?php echo $COL_MY_ITU_ZONE."\n"; ?>
-<?php if ($COL_MY_IOTA != "") {
+<?php
+if ($COL_MY_IOTA != "") {
    echo "IOTA: ".$COL_MY_IOTA."\n";
 }
 ?>
