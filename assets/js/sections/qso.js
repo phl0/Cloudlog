@@ -282,6 +282,7 @@ function reset_fields() {
 	$('#qsl_via').val("");
 	$('#callsign_info').text("");
 	$('#input_usa_state').val("");
+	$('#email').val("");
 	$('#qso-last-table').show();
 	$('#partial_view').hide();
 
