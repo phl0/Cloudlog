@@ -487,6 +487,19 @@ class Logbook_model extends CI_Model {
           'newline' => "\r\n"
        );
 
+       // Get Date format
+       if($this->session->userdata('user_date_format')) {
+         // If Logged in and session exists
+         $custom_date_format = $this->session->userdata('user_date_format');
+       } else {
+         // Get Default date format from /config/cloudlog.php
+         $custom_date_format = $this->config->item('qso_date_format');
+       }
+       $timestamp = strtotime($data['COL_TIME_ON']);
+
+       $random = bin2hex(random_bytes(6));
+       $filename = 'QSL_'.(str_replace('/', '_', $data['COL_CALL'])).'_'.date("Ymd_Hi", $timestamp).'_'.$random.'.jpg';
+
        $this->email->initialize($config);
 
        $message = $this->load->view('email/mail_qsl', $data,  TRUE);
@@ -496,6 +509,38 @@ class Logbook_model extends CI_Model {
 
        $this->email->subject('Email QSL from '.$data['COL_STATION_CALLSIGN']);
        $this->email->message($message);
+       $this->load->library('image_lib');
+       //$config['image_library'] = 'gd2';
+       $config['source_image'] = './qsl.jpg';
+       $config['new_image'] = './'.$filename;
+       $config['wm_text'] = 'To: '.$data['COL_CALL'].' Confirms '.$data['COL_BAND'].' '.($data['COL_PROP_MODE'] == "" ? "" : $data['COL_PROP_MODE']).' '.$data['COL_MODE'].' QSO';
+       if ($data['COL_FREQ'] != "") {
+          $config['wm_text'] .= ' ('.$this->frequency->hz_to_mhz($data['COL_FREQ']).')';
+       }
+       $config['wm_type'] = 'text';
+       $config['wm_font_size'] = '16';
+       $config['wm_font_color'] = '000000';
+       $config['wm_vrt_alignment'] = 'bottom';
+       $config['wm_hor_alignment'] = 'left';
+       $config['wm_vrt_offset'] = '-45';
+       $config['wm_hor_offset'] = '10';
+       $this->image_lib->initialize($config);
+       $this->image_lib->watermark();
+       $config['source_image'] = './'.$filename;
+       $config['wm_text'] = 'Date: '.date($custom_date_format, $timestamp).', Time: '.date("H:i", $timestamp).'z, Report: '.$data['COL_RST_SENT'];
+       $config['wm_vrt_offset'] = '-25';
+       $this->image_lib->initialize($config);
+       $this->image_lib->watermark();
+       if ($data['COL_PROP_MODE'] == "SAT") {
+          $config['wm_text'] = 'Satellite: '.$data['COL_SAT_NAME'].', Downlink: '.$data['COL_BAND_RX'];
+          if ($data['COL_FREQ_RX'] != "") {
+             $config['wm_text'] .= ' ('.$this->frequency->hz_to_mhz($data['COL_FREQ_RX']).')';
+          }
+          $config['wm_vrt_offset'] = '-5';
+          $this->image_lib->initialize($config);
+          $this->image_lib->watermark();
+       }
+       $this->email->attach('./'.$filename);
 
        $this->email->send();
     }
