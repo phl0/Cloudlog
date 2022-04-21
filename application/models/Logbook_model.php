@@ -510,25 +510,26 @@ class Logbook_model extends CI_Model {
        $this->email->subject('Email QSL from '.$data['COL_STATION_CALLSIGN']);
        $this->email->message($message);
        $this->load->library('image_lib');
-       //$config['image_library'] = 'gd2';
-       $config['source_image'] = './qsl.jpg';
-       $config['new_image'] = './'.$filename;
+       $config['image_library'] = 'gd2';
+       $config['source_image'] = './qsl/qsl_template.jpg';
+       $config['new_image'] = './qsl/'.$filename;
        $config['wm_text'] = 'To: '.$data['COL_CALL'].' Confirms '.$data['COL_BAND'].' '.($data['COL_PROP_MODE'] == "" ? "" : $data['COL_PROP_MODE']).' '.$data['COL_MODE'].' QSO';
        if ($data['COL_FREQ'] != "") {
           $config['wm_text'] .= ' ('.$this->frequency->hz_to_mhz($data['COL_FREQ']).')';
        }
        $config['wm_type'] = 'text';
-       $config['wm_font_size'] = '16';
+       $config['wm_font_path'] = './qsl/DejaVuSans.ttf';
+       $config['wm_font_size'] = '24';
        $config['wm_font_color'] = '000000';
        $config['wm_vrt_alignment'] = 'bottom';
        $config['wm_hor_alignment'] = 'left';
-       $config['wm_vrt_offset'] = '-45';
-       $config['wm_hor_offset'] = '10';
+       $config['wm_vrt_offset'] = '-165';
+       $config['wm_hor_offset'] = '20';
        $this->image_lib->initialize($config);
        $this->image_lib->watermark();
-       $config['source_image'] = './'.$filename;
+       $config['source_image'] = './qsl/'.$filename;
        $config['wm_text'] = 'Date: '.date($custom_date_format, $timestamp).', Time: '.date("H:i", $timestamp).'z, Report: '.$data['COL_RST_SENT'];
-       $config['wm_vrt_offset'] = '-25';
+       $config['wm_vrt_offset'] = '-125';
        $this->image_lib->initialize($config);
        $this->image_lib->watermark();
        if ($data['COL_PROP_MODE'] == "SAT") {
@@ -536,11 +537,17 @@ class Logbook_model extends CI_Model {
           if ($data['COL_FREQ_RX'] != "") {
              $config['wm_text'] .= ' ('.$this->frequency->hz_to_mhz($data['COL_FREQ_RX']).')';
           }
-          $config['wm_vrt_offset'] = '-5';
+          $config['wm_vrt_offset'] = '-85';
           $this->image_lib->initialize($config);
           $this->image_lib->watermark();
        }
-       $this->email->attach('./'.$filename);
+       if ($data['COL_QSLMSG'] != "") {
+          $config['wm_text'] = $data['COL_QSLMSG'];
+          $config['wm_vrt_offset'] = '-45';
+          $this->image_lib->initialize($config);
+          $this->image_lib->watermark();
+       }
+       $this->email->attach('./qsl/'.$filename);
 
        $this->email->send();
     }

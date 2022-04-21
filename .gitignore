@@ -8,6 +8,7 @@
 /install/*
 /updates/*.xml
 /updates/*.html
+/qsl/QSL_*.jpg
 /images/eqsl_card_images/*.jpg
 /updates/clublog_scp.txt
 /assets/qslcard/*
