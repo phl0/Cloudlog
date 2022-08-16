@@ -62,6 +62,32 @@ class adif extends CI_Controller {
 		$this->load->view('adif/data/exportsat', $data);
 	}
 
+	// Export all LEO SAT QSO Data in ASC Order of Date.
+	public function exportleosat()
+	{
+		// Set memory limit to unlimited to allow heavy usage
+		ini_set('memory_limit', '-1');
+
+		$this->load->model('adif_data');
+
+		$data['qsos'] = $this->adif_data->leo_sat_all();
+
+		$this->load->view('adif/data/exportsat', $data);
+	}
+
+	// Export all GEO SAT QSO Data in ASC Order of Date.
+	public function exportgeosat()
+	{
+		// Set memory limit to unlimited to allow heavy usage
+		ini_set('memory_limit', '-1');
+
+		$this->load->model('adif_data');
+
+		$data['qsos'] = $this->adif_data->geo_sat_all();
+
+		$this->load->view('adif/data/exportsat', $data);
+	}
+
 	// Export all QSO Data in ASC Order of Date.
 	public function exportsatlotw()
 	{
@@ -71,6 +97,32 @@ class adif extends CI_Controller {
 		$this->load->model('adif_data');
 
 		$data['qsos'] = $this->adif_data->satellte_lotw();
+
+		$this->load->view('adif/data/exportsat', $data);
+	}
+
+	// Export all LEO QSO Data in ASC Order of Date.
+	public function exportleosatlotw()
+	{
+		// Set memory limit to unlimited to allow heavy usage
+		ini_set('memory_limit', '-1');
+
+		$this->load->model('adif_data');
+
+		$data['qsos'] = $this->adif_data->leo_satellte_lotw();
+
+		$this->load->view('adif/data/exportsat', $data);
+	}
+
+	// Export all GEO QSO Data in ASC Order of Date.
+	public function exportgeosatlotw()
+	{
+		// Set memory limit to unlimited to allow heavy usage
+		ini_set('memory_limit', '-1');
+
+		$this->load->model('adif_data');
+
+		$data['qsos'] = $this->adif_data->geo_satellte_lotw();
 
 		$this->load->view('adif/data/exportsat', $data);
 	}

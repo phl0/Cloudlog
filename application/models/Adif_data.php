@@ -49,6 +49,40 @@ class adif_data extends CI_Model {
         return $this->db->get();
     }
 
+    function leo_sat_all() {
+        $this->load->model('stations');
+        $active_station_id = $this->stations->find_active();
+
+        $this->db->select(''.$this->config->item('table_name').'.*, station_profile.*');
+        $this->db->from($this->config->item('table_name'));
+        $this->db->where($this->config->item('table_name').'.station_id', $active_station_id);
+        $this->db->where($this->config->item('table_name').'.COL_PROP_MODE', 'SAT');
+        $this->db->where($this->config->item('table_name').'.COL_SAT_NAME !=', 'QO-100');
+
+        $this->db->order_by($this->config->item('table_name').".COL_TIME_ON", "ASC");
+
+        $this->db->join('station_profile', 'station_profile.station_id = '.$this->config->item('table_name').'.station_id');
+
+        return $this->db->get();
+    }
+
+    function geo_sat_all() {
+        $this->load->model('stations');
+        $active_station_id = $this->stations->find_active();
+
+        $this->db->select(''.$this->config->item('table_name').'.*, station_profile.*');
+        $this->db->from($this->config->item('table_name'));
+        $this->db->where($this->config->item('table_name').'.station_id', $active_station_id);
+        $this->db->where($this->config->item('table_name').'.COL_PROP_MODE', 'SAT');
+        $this->db->where($this->config->item('table_name').'.COL_SAT_NAME', 'QO-100');
+
+        $this->db->order_by($this->config->item('table_name').".COL_TIME_ON", "ASC");
+
+        $this->db->join('station_profile', 'station_profile.station_id = '.$this->config->item('table_name').'.station_id');
+
+        return $this->db->get();
+    }
+
     function satellte_lotw() {
         $this->load->model('stations');
         $active_station_id = $this->stations->find_active();
@@ -57,6 +91,48 @@ class adif_data extends CI_Model {
         $this->db->from($this->config->item('table_name'));
         $this->db->where($this->config->item('table_name').'.station_id', $active_station_id);
         $this->db->where($this->config->item('table_name').'.COL_PROP_MODE', 'SAT');
+
+        $where = $this->config->item('table_name').".COL_LOTW_QSLRDATE != ''";
+        $this->db->where($where);
+
+        $this->db->order_by($this->config->item('table_name').".COL_TIME_ON", "ASC");
+
+
+        $this->db->join('station_profile', 'station_profile.station_id = '.$this->config->item('table_name').'.station_id');
+
+        return $this->db->get();
+    }
+
+    function leo_satellte_lotw() {
+        $this->load->model('stations');
+        $active_station_id = $this->stations->find_active();
+
+        $this->db->select(''.$this->config->item('table_name').'.*, station_profile.*');
+        $this->db->from($this->config->item('table_name'));
+        $this->db->where($this->config->item('table_name').'.station_id', $active_station_id);
+        $this->db->where($this->config->item('table_name').'.COL_PROP_MODE', 'SAT');
+        $this->db->where($this->config->item('table_name').'.COL_SAT_NAME !=', 'QO-100');
+
+        $where = $this->config->item('table_name').".COL_LOTW_QSLRDATE != ''";
+        $this->db->where($where);
+
+        $this->db->order_by($this->config->item('table_name').".COL_TIME_ON", "ASC");
+
+
+        $this->db->join('station_profile', 'station_profile.station_id = '.$this->config->item('table_name').'.station_id');
+
+        return $this->db->get();
+    }
+
+    function geo_satellte_lotw() {
+        $this->load->model('stations');
+        $active_station_id = $this->stations->find_active();
+
+        $this->db->select(''.$this->config->item('table_name').'.*, station_profile.*');
+        $this->db->from($this->config->item('table_name'));
+        $this->db->where($this->config->item('table_name').'.station_id', $active_station_id);
+        $this->db->where($this->config->item('table_name').'.COL_PROP_MODE', 'SAT');
+        $this->db->where($this->config->item('table_name').'.COL_SAT_NAME', 'QO-100');
 
         $where = $this->config->item('table_name').".COL_LOTW_QSLRDATE != ''";
         $this->db->where($where);

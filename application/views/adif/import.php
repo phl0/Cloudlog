@@ -149,8 +149,15 @@
                 <p><a href="<?php echo site_url('adif/exportsat'); ?>" title="Export All Satellite Contacts" target="_blank" class="btn-sm btn-primary">Export All Satellite QSOs</a></p>
 
                 <p><a href="<?php echo site_url('adif/exportsatlotw'); ?>" title="Export All Satellite QSOS Confirmed on LoTW" target="_blank" class="btn-sm btn-primary">Export All Satellite QSOs Confirmed on LoTW</a></p>
-                </div>
 
+                <h5>Export LEO Satellite-Only QSOs</h5>
+                <a href="<?php echo site_url('adif/exportleosat'); ?>" title="Export All LEO Satellite Contacts" target="_blank" class="btn-sm btn-primary">Export All LEO Satellite QSOs</a></p>
+                <p><a href="<?php echo site_url('adif/exportleosatlotw'); ?>" title="Export All LEO Satellite QSOS Confirmed on LoTW" target="_blank" class="btn-sm btn-primary">Export All LEO Satellite QSOs Confirmed on LoTW</a></p>
+
+                <h5>Export GEO Satellite-Only QSOs</h5>
+                <a href="<?php echo site_url('adif/exportgeosat'); ?>" title="Export All GEO Satellite Contacts" target="_blank" class="btn-sm btn-primary">Export All GEO Satellite QSOs</a></p>
+                <p><a href="<?php echo site_url('adif/exportgeosatlotw'); ?>" title="Export All GEO Satellite QSOS Confirmed on LoTW" target="_blank" class="btn-sm btn-primary">Export All GEO Satellite QSOs Confirmed on LoTW</a></p>
+                </div>
 
         <div class="tab-pane fade" id="lotw" role="tabpanel" aria-labelledby="home-tab">
             <form class="form" action="<?php echo site_url('adif/mark_lotw'); ?>" method="post" enctype="multipart/form-data">
