@@ -162,6 +162,14 @@
                 </div>
               </div>
 
+            <div class="form-group row">
+              <label for="darc_dok" class="col-sm-3 col-form-label"><?php echo $this->lang->line('gen_hamradio_dok'); ?></label>
+                  <div class="col-sm-9">
+              <input class="form-control form-control-sm" id="darc_dok" type="text" name="darc_dok" value="" />
+              <small id="dokHelp" class="form-text text-muted"><?php echo $this->lang->line('qso_dok_helptext'); ?></small>
+                </div>
+            </div>
+
               <div class="form-group row">
                   <label for="comment" class="col-sm-3 col-form-label"><?php echo $this->lang->line('general_word_comment'); ?></label>
                   <div class="col-sm-9">
@@ -409,12 +417,6 @@
               <label for="sig_info"><?php echo $this->lang->line('gen_hamradio_sig_info'); ?></label>
               <input class="form-control" id="sig_info" type="text" name="sig_info" value="" />
               <small id="sigInfoHelp" class="form-text text-muted"><?php echo $this->lang->line('qso_sig_info_helptext'); ?></small>
-            </div>
-
-            <div class="form-group">
-              <label for="darc_dok"><?php echo $this->lang->line('gen_hamradio_dok'); ?></label>
-              <input class="form-control" id="darc_dok" type="text" name="darc_dok" value="" />
-              <small id="dokHelp" class="form-text text-muted"><?php echo $this->lang->line('qso_dok_helptext'); ?></small>
             </div>
           </div>
 
