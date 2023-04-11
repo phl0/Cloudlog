@@ -322,34 +322,34 @@ class Lotw extends CI_Controller {
 					curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
 
 					//Execute the request
-					$result = curl_exec($ch);
+					//$result = curl_exec($ch);
 
 					//If an error occured, throw an exception
 					//with the error message.
-					if(curl_errno($ch)){
-					    throw new Exception(curl_error($ch));
-					}
+					//if(curl_errno($ch)){
+					    //throw new Exception(curl_error($ch));
+					//}
 
-					$pos = strpos($result, "<!-- .UPL.  accepted -->");
+					//$pos = strpos($result, "<!-- .UPL.  accepted -->");
 
-					if ($pos === false) {
+					//if ($pos === false) {
 						// Upload of TQ8 Failed for unknown reason
-					    echo $station_profile->station_callsign." (".$station_profile->station_profile_name.") Upload Failed"."<br>";
-					} else {
+					    //echo $station_profile->station_callsign." (".$station_profile->station_profile_name.") Upload Failed"."<br>";
+					//} else {
 						// Upload of TQ8 was successfull
 
-					    echo "Upload Successful - ".$filename_for_saving."<br>";
+					    echo "Upload would have been Successful - ".$filename_for_saving."<br>";
 
-					    $this->LotwCert->last_upload($data['lotw_cert_info']->lotw_cert_id);
+					    //$this->LotwCert->last_upload($data['lotw_cert_info']->lotw_cert_id);
 
 					    // Mark QSOs as Sent
-					    foreach ($qso_id_array as $qso_number) {
-					    	$this->Logbook_model->mark_lotw_sent($qso_number);
-					    }
-					}
+					    //foreach ($qso_id_array as $qso_number) {
+					    	//$this->Logbook_model->mark_lotw_sent($qso_number);
+					    //}
+					//}
 
 					// Delete TQ8 File - This is done regardless of whether upload was succcessful
-					unlink(realpath($filename_for_saving));
+					//unlink(realpath($filename_for_saving));
 				}
 			} else {
 				echo "No Station Profiles found to upload to LOTW";
