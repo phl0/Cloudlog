@@ -534,6 +534,11 @@ class Logbook_model extends CI_Model {
 				$this->mark_webadif_qsos_sent([$last_id]);
 			}
 		}
+
+		if ($data['COL_WWFF_REF'] != '') {
+			$this->push_qso_to_cqgma($data);
+		}
+
 	}
   }
 
@@ -645,6 +650,19 @@ class Logbook_model extends CI_Model {
 		$response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 		return $response === 200;
+	}
+
+	/*
+	 * Function uploads a QSO to cqgma.org.
+	 */
+	function push_qso_to_cqgma($data) {
+		// Format: csv=1,DATE,TIME,MYCALL,MYREF,CROSS1,CROSS2,CROSS3,CROSS4,MYGRID,CALL,RSTs,RSTr,SRX,GRIDSQUARE,MHZ,MODE,"REMARKS","WWFF_REF",username,passw0rd
+		$string = "?csv=1,".date('Ymd', strtotime($data['COL_TIME_ON'])).",".date('Hi', strtotime($data['COL_TIME_ON'])).",".$data['COL_STATION_CALLSIGN'].",".$data['COL_MY_WWFF_REF'].",,,,,".$data['COL_MY_GRIDSQUARE'].",".$data['COL_CALL'].",".$data['COL_RST_SENT'].",".$data['COL_RST_RCVD'].",".$data['COL_SRX'].",".$data['COL_GRIDSQUARE'].",".substr($this->frequency->hz_to_mhz($data['COL_FREQ']),0,-4).",".$data['COL_MODE'].",\"".$data['COL_COMMENT']."\",\"".$data['COL_WWFF_REF']."\",user,passw0rd";
+		$url = 'https://www.cqgma.org/rxqw.php'.$string;
+		$ch = curl_init( $url );
+		curl_setopt( $ch, CURLOPT_HEADER, 0);
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true);
+		$content = curl_exec($ch);
 	}
 
   /*
