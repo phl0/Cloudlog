@@ -34,7 +34,7 @@
     display:none;
 }
 #latDeg, #lngDeg {
-    width: 170px;
+    width: 190px;
 }
 #locator, #distance, #bearing {
     width: 120px;
