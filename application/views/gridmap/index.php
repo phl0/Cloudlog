@@ -51,7 +51,11 @@
             <select class="custom-select my-1 mr-sm-2"  id="band">
                 <option value="All">All</option>
 				<?php foreach($bands as $band) {
-					echo '<option value="' . $band . '"' . '>' . $band . '</option>'."\n";
+            echo '<option value="'.$band.'"';
+            if ($band == 'SAT') {
+               echo ' selected="selected"';
+            }
+            echo '>'.$band.'</option>'."\n";
                 } ?>
             </select>
             <?php if (count($sats_available) != 0) { ?>
@@ -79,7 +83,7 @@
 			<label class="my-1 mr-2"><?php echo lang('gridsquares_confirmation'); ?></label>
                 <div>
                     <div class="form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="qsl" id="qsl" checked>
+                        <input class="form-check-input" type="checkbox" name="qsl" id="qsl">
                         <label class="form-check-label" for="qsl">QSL</label>
                     </div>
                     <div class="form-check-inline">
