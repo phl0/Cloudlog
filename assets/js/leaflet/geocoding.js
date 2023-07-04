@@ -16,17 +16,11 @@ function ConvertDDToDMS(lat, lng) {
 		lng = lng - 360;
 	}
 
-	LatLng['latDeg'] = (lat < 0 ? "S" : "N") + " " + pad((0 |(lat < 0 ? (lat = -lat) : lat)), 2) + "° " + pad(0 | (((lat += 1e-9) % 1) * 60),2) + "' " + ((0 | (((lat * 60) % 1) * 6000)) / 100) + "\"";
+	LatLng['latDeg'] = (lat < 0 ? "S" : "N") + " " + (0 | (lat < 0 ? (lat = -lat) : lat)).toString().padStart(3,"0") + "° " + (0 | (((lat += 1e-9) % 1) * 60)).toFixed(2).toString().padStart(5,"0") + "' " + ((0 | (((lat * 60) % 1) * 6000)) / 100).toFixed(2).toString().padStart(5,"0") + "\"";
 
-	LatLng['lngDeg'] = (lng < 0 ? "W" : "E") + " " + pad((0 | (lng < 0 ? (lng = -lng) : lng)), 3) + "° " + pad(0 | (((lng += 1e-9) % 1) * 60),2) + "' " + ((0 | (((lng * 60) % 1) * 6000)) / 100) + "\"";
+	LatLng['lngDeg'] = (lng < 0 ? "W" : "E") + " " + (0 | (lng < 0 ? (lng = -lng) : lng)).toString().padStart(3,"0") + "° " + (0 | (((lng += 1e-9) % 1) * 60)).toFixed(2).toString().padStart(5,"0") + "' " + ((0 | (((lng * 60) % 1) * 6000)) / 100).toFixed(2).toString().padStart(5,"0") + "\"";
 
 	return LatLng;
-}
-
-function pad(n, width, z) {
-  z = z || '0';
-  n = n + '';
-  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
 const latLngToLocator = (lat, lng) => {
@@ -57,8 +51,8 @@ const latLngToLocator = (lat, lng) => {
 
 function onMapMove(event) {
 	var LatLng = event.latlng;
-	var lat = LatLng.lat; 
-	var lng = LatLng.lng; 					
+	var lat = LatLng.lat;
+	var lng = LatLng.lng;
 	var LatLng2 = ConvertDDToDMS(lat, lng);
 	$('#latDeg').html(LatLng2.latDeg);
 	$('#lngDeg').html(LatLng2.lngDeg);
@@ -66,8 +60,8 @@ function onMapMove(event) {
 	$('#locator').html(locator);
 	var distance = bearingDistance(homegrid, locator);
 
-	$('#bearing').html(distance.deg + ' deg');
-	$('#distance').html(Math.round(distance.km * 10) / 10 + ' km');
+	$('#bearing').html(distance.deg + ' °');
+	$('#distance').html((Math.round(distance.km * 10) / 10).toFixed(1).padStart(7,"\u00A0") + ' km');
 };
 
 const bearingDistance = (from, to) => {
@@ -79,16 +73,16 @@ const bearingDistance = (from, to) => {
 	const toLat = degToRad(toCoords[0]);
 	const a = Math.pow(Math.sin(dLat / 2), 2) + Math.pow(Math.sin(dLon / 2), 2) * Math.cos(fromLat) * Math.cos(toLat);
 	const b = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	
+
 	const y = (dLon) * Math.cos(fromLat) * Math.cos(toLat);
 	const x = Math.sin(toLat) - Math.sin(fromLat) * Math.cos(b);
-	
+
 	let az = Math.atan2(y, x);
-	
+
 	if (az < 0) {
 		az += 2 * Math.PI;
 	}
-	
+
 	return {
 		km: b * 6371,
 		deg: calcAngle(fromCoords, toCoords)
@@ -104,7 +98,7 @@ var calcAngle = function (p1, p2) {
 	var x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(lng2-lng1);
 	var brng = (Math.atan2(y, x) * 180 / Math.PI + 360).toFixed(0);
 
-	return (brng % 360);
+	return (brng % 360).toString().padStart(3,"0");
 }
 
 const locatorToLatLng = (locatorString) => {
@@ -112,14 +106,14 @@ const locatorToLatLng = (locatorString) => {
 	if (!isValidLocatorString(locatorString)) {
 		throw new Error('Input is not valid locator string');
 	}
-	
+
 	const fieldLng = charToNumber(locatorString[0]) * 20;
 	const fieldLat = charToNumber(locatorString[1]) * 10;
 	const squareLng = Number.parseInt(locatorString[2]) * 2;
 	const squareLat = Number.parseInt(locatorString[3]);
 	const subsquareLng = (charToNumber(locatorString[4]) + 0.5) / 12;
 	const subsquareLat = (charToNumber(locatorString[5]) + 0.5) / 24;
-	
+
 	return [
 		fieldLat + squareLat + subsquareLat - 90,
 		fieldLng + squareLng + subsquareLng - 180
