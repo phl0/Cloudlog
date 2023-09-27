@@ -45,6 +45,8 @@
                       echo "<a href=\"https://x.com/Diwata2PH?s=20\" target=\"_blank\">Info</a>";
                    } else if (strpos($activation['sat'], 'CAS-3H') !== false) {
                       echo "<a href=\"https://www.amsat.org/two-way-satellites/lilacsat-2-cas-3h/\" target=\"_blank\">Info</a>";
+                   } else if (strpos($activation['sat'], 'LEDSAT') !== false) {
+                      echo "<a href=\"https://www.esa.int/Education/CubeSats_-_Fly_Your_Satellite/Connect_and_communicate_with_a_satellite_via_the_LEDSAT_Digipeater_Challenge\" target=\"_blank\">Info</a>";
                    }
                 ?>
                 </td>

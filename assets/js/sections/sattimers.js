@@ -39,7 +39,7 @@ function update(i) {
   }
 }
 
-for (let i=1; i<=12; i++) {
+for (let i=1; i<=13; i++) {
       var x = setInterval(function() {
                update(i);
             }, 1000);
