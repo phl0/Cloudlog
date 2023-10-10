@@ -74,7 +74,7 @@
               <div class="form-row">
                 <div class="form-group col-md-9">
                   <label for="callsign"><?php echo lang('gen_hamradio_callsign'); ?></label><?php if ($this->optionslib->get_option('dxcache_url') != '') { ?>&nbsp;<i id="check_cluster" data-toggle="tooltip" data-original-title="Search DXCluster for latest Spot" class="fas fa-search"></i> <?php } ?>
-                  <input type="text" class="form-control" id="callsign" name="callsign" required>
+                  <input type="text" class="form-control" id="callsign" name="callsign" value="<?php echo validation_errors() != '' ? set_value('callsign') : '' ?>" required>
                   <small id="callsign_info" class="badge badge-secondary"></small> <a id="lotw_link"><small id="lotw_info" class="badge badge-success"></small></a>
                 </div>
                 <div class="form-group col-md-3 align-self-center">
@@ -133,21 +133,21 @@
               <div class="form-group row">
                   <label for="name" class="col-sm-3 col-form-label"><?php echo lang('general_word_name'); ?></label>
                   <div class="col-sm-9">
-                    <input type="text" class="form-control form-control-sm" name="name" id="name" value="">
+                    <input type="text" class="form-control form-control-sm" name="name" id="name" value="<?php echo validation_errors() != '' ? set_value('name') : '' ?>">
                 </div>
               </div>
 
               <div class="form-group row">
                 <label for="qth" class="col-sm-3 col-form-label"><?php echo lang('general_word_location'); ?></label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control form-control-sm" name="qth" id="qth" value="">
+                    <input type="text" class="form-control form-control-sm" name="qth" id="qth" value="<?php echo validation_errors() != '' ? set_value('qth') : '' ?>" >
                 </div>
               </div>
 
               <div class="form-group row">
                   <label for="locator" class="col-sm-3 col-form-label"><?php echo lang('gen_hamradio_gridsquare'); ?></label>
                   <div class="col-sm-9">
-                    <input type="text" class="form-control form-control-sm" name="locator" id="locator" value="">
+                    <input type="text" class="form-control form-control-sm" name="locator" id="locator" value="<?php echo validation_errors() != '' ? set_value('locator') : '' ?>">
                     <small id="locator_info" class="form-text text-muted"></small>
                 </div>
               </div>
