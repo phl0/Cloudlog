@@ -147,7 +147,7 @@
               <div class="form-group row">
                   <label for="locator" class="col-sm-3 col-form-label"><?php echo lang('gen_hamradio_gridsquare'); ?></label>
                   <div class="col-sm-9">
-                    <input type="text" class="form-control form-control-sm" name="locator" id="locator" value="<?php echo validation_errors() != '' ? set_value('locator') : '' ?>">
+                    <input type="text" class="form-control form-control-sm" name="locator" id="locator" pattern="^([A-Ra-r]{2})|([A-Ra-r]{2}[0-9]{2})|([A-Ra-r]{2}[0-9]{2}[A-Za-z]{2})|([A-Ra-r]{2}[0-9]{2}[A-Za-z]{2}[0-9]{2})|([A-Ra-r]{2}[0-9]{2},[A-Ra-r]{2}[0-9]{2})|([A-Ra-r]{2}[0-9]{2},[A-Ra-r]{2}[0-9]{2},[A-Ra-r]{2}[0-9]{2},[A-Ra-r]{2}[0-9]{2})$" value="<?php echo validation_errors() != '' ? set_value('locator') : '' ?>">
                     <small id="locator_info" class="form-text text-muted"></small>
                 </div>
               </div>
