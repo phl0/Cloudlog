@@ -760,13 +760,10 @@ class Logbook_model extends CI_Model
       $this->clear_dashboard_cache($data['station_id']);
     }
 
-    if ($data['COL_PROP_MODE'] == "SAT") {
-      if ($this->session->userdata('user_amsat_status_upload')) {
-      $this->upload_amsat_status($data);
-      }
-      if ($this->session->userdata('user_oscarwatch_status_upload')) {
-      $this->upload_oscarwatch_status($data);
-      }
+    // Bulk ADIF import skips live satellite status reports.
+    // Manual logging and realtime API QSO import still report when enabled.
+    if (!$skipexport) {
+      $this->maybe_upload_satellite_status($data);
     }
 
     $this->load->library('cloudlog_hooks');
@@ -1315,10 +1312,70 @@ class Logbook_model extends CI_Model
     curl_exec($ch);
   }
 
-  function upload_oscarwatch_status($data)
+  private function maybe_upload_satellite_status($data)
+  {
+    $prop_mode = strtoupper(trim((string)($data['COL_PROP_MODE'] ?? '')));
+    $sat_name = trim((string)($data['COL_SAT_NAME'] ?? ''));
+    if ($prop_mode !== 'SAT' && $sat_name === '') {
+      return;
+    }
+
+    $user_id = $this->get_station_owner_user_id($data);
+    if (empty($user_id)) {
+      return;
+    }
+
+    $user = $this->db->select('user_amsat_status_upload')
+      ->where('user_id', $user_id)
+      ->get('users')
+      ->row();
+    $amsat_enabled = isset($user->user_amsat_status_upload) ? (int)$user->user_amsat_status_upload : 0;
+
+    $this->load->model('user_options_model');
+    $oscarwatch_option = $this->user_options_model->get_options(
+      'oscarwatch',
+      array('option_name' => 'status_upload', 'option_key' => 'enabled'),
+      $user_id
+    )->row();
+    $oscarwatch_enabled = isset($oscarwatch_option->option_value) ? (int)$oscarwatch_option->option_value : 0;
+
+    if ($amsat_enabled) {
+      $this->upload_amsat_status($data);
+    }
+    if ($oscarwatch_enabled) {
+      $this->upload_oscarwatch_status($data, $user_id);
+    }
+  }
+
+  private function get_station_owner_user_id($data)
+  {
+    $user_id = $this->session->userdata('user_id');
+    if (!empty($user_id)) {
+      return $user_id;
+    }
+
+    $station_id = $data['station_id'] ?? null;
+    if (empty($station_id)) {
+      return null;
+    }
+
+    $this->load->model('stations');
+    $station = $this->stations->profile_clean($station_id);
+    if (empty($station) || empty($station->user_id)) {
+      return null;
+    }
+
+    return $station->user_id;
+  }
+
+  function upload_oscarwatch_status($data, $user_id = null)
   {
     $this->load->model('user_options_model');
-    $token_option = $this->user_options_model->get_options('oscarwatch', array('option_name' => 'api_token', 'option_key' => 'value'))->row();
+    $token_option = $this->user_options_model->get_options(
+      'oscarwatch',
+      array('option_name' => 'api_token', 'option_key' => 'value'),
+      $user_id
+    )->row();
     $token = trim((string)($token_option->option_value ?? ''));
 
     if ($token === '') {
@@ -1330,12 +1387,7 @@ class Logbook_model extends CI_Model
       return;
     }
 
-    $sat_mode = trim((string)($data['COL_SAT_MODE'] ?? ''));
-    if ($sat_mode === '') {
-      log_message('error', 'OscarWatch upload skipped: missing SAT mode for SAT QSO on ' . $satellite);
-      return;
-    }
-
+    $sat_mode = $this->derive_oscarwatch_sat_mode($data);
     $mode = $this->remap_oscarwatch_mode(
       $satellite,
       $sat_mode,
@@ -1406,12 +1458,101 @@ class Logbook_model extends CI_Model
     }
   }
 
+  private function derive_oscarwatch_sat_mode($data)
+  {
+    $sat_mode = strtoupper(trim((string)($data['COL_SAT_MODE'] ?? '')));
+    if (strlen($sat_mode) === 2 && strpos($sat_mode, '/') === false) {
+      $sat_mode = $sat_mode[0] . '/' . $sat_mode[1];
+    }
+    if ($sat_mode !== '') {
+      return $sat_mode;
+    }
+
+    // WSJT-X ADIF often omits SAT_MODE; derive it from TX/RX bands or frequencies.
+    $up = $this->sat_band_designator($data['COL_BAND'] ?? '', $data['COL_FREQ'] ?? null);
+    $down = $this->sat_band_designator($data['COL_BAND_RX'] ?? '', $data['COL_FREQ_RX'] ?? null);
+    if ($up === '') {
+      return '';
+    }
+    if ($down === '' || $up === $down) {
+      return $up;
+    }
+
+    return $up . '/' . $down;
+  }
+
+  private function sat_band_designator($band, $freq)
+  {
+    $band = strtolower(trim((string)$band));
+    $band_map = array(
+      '15m' => 'H',
+      '10m' => 'A',
+      '2m' => 'V',
+      '70cm' => 'U',
+      '23cm' => 'L',
+      '13cm' => 'S',
+      '9cm' => 'S2',
+      '6cm' => 'C',
+      '3cm' => 'X',
+      '1.25cm' => 'K',
+    );
+    if (isset($band_map[$band])) {
+      return $band_map[$band];
+    }
+
+    $freq = (float)$freq;
+    if ($freq > 0 && $freq < 100000) {
+      $freq *= 1E6;
+    }
+
+    if ($freq > 21000000 && $freq < 22000000) {
+      return 'H';
+    }
+    if ($freq > 28000000 && $freq < 30000000) {
+      return 'A';
+    }
+    if ($freq > 144000000 && $freq < 147000000) {
+      return 'V';
+    }
+    if ($freq > 432000000 && $freq < 438000000) {
+      return 'U';
+    }
+    if ($freq > 1240000000 && $freq < 1300000000) {
+      return 'L';
+    }
+    if ($freq > 2320000000 && $freq < 2450000000) {
+      return 'S';
+    }
+    if ($freq > 3400000000 && $freq < 3475000000) {
+      return 'S2';
+    }
+    if ($freq > 5650000000 && $freq < 5850000000) {
+      return 'C';
+    }
+    if ($freq > 10000000000 && $freq < 10500000000) {
+      return 'X';
+    }
+    if ($freq > 24000000000 && $freq < 24250000000) {
+      return 'K';
+    }
+
+    return '';
+  }
+
   private function remap_oscarwatch_mode($satellite, $sat_mode, $band, $band_rx)
   {
     $satellite_normalized = strtoupper(trim((string)$satellite));
     $sat_mode_normalized = strtoupper(trim((string)$sat_mode));
     $band_normalized = strtolower(trim((string)$band));
     $band_rx_normalized = strtolower(trim((string)$band_rx));
+
+    // QO-100 FTx from WSJT-X is almost always NB and often has no SAT_MODE.
+    if ($satellite_normalized === 'QO-100') {
+      if (in_array($sat_mode_normalized, array('WB', 'DATV', 'WIDEBAND', 'WIDEBAND DATV'), true)) {
+        return 'Wideband DATV';
+      }
+      return 'Narrowband Transponder';
+    }
 
     // AO-07 is commonly logged as direction shorthand; map to catalog Mode A/B.
     if ($satellite_normalized === 'AO-07' || $satellite_normalized === 'AO-7') {
