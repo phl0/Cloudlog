@@ -1342,7 +1342,8 @@ class Logbook_model extends CI_Model
     if ($amsat_enabled) {
       $this->upload_amsat_status($data);
     }
-    if ($oscarwatch_enabled) {
+    // OscarWatch reports the SAT_NAME from the QSO. Do not invent a satellite.
+    if ($oscarwatch_enabled && $sat_name !== '') {
       $this->upload_oscarwatch_status($data, $user_id);
     }
   }
@@ -1384,6 +1385,7 @@ class Logbook_model extends CI_Model
 
     $satellite = trim((string)($data['COL_SAT_NAME'] ?? ''));
     if ($satellite === '') {
+      log_message('error', 'OscarWatch upload skipped: SAT_NAME is required');
       return;
     }
 
@@ -1392,7 +1394,9 @@ class Logbook_model extends CI_Model
       $satellite,
       $sat_mode,
       trim((string)($data['COL_BAND'] ?? '')),
-      trim((string)($data['COL_BAND_RX'] ?? ''))
+      trim((string)($data['COL_BAND_RX'] ?? '')),
+      trim((string)($data['COL_MODE'] ?? '')),
+      trim((string)($data['COL_SUBMODE'] ?? ''))
     );
 
     if ($mode === '') {
@@ -1539,16 +1543,37 @@ class Logbook_model extends CI_Model
     return '';
   }
 
-  private function remap_oscarwatch_mode($satellite, $sat_mode, $band, $band_rx)
+  private function is_qo100_wideband_datv($mode, $submode)
+  {
+    $mode = strtoupper(trim((string)$mode));
+    $submode = strtoupper(str_replace(array(' ', '_'), array('', '-'), trim((string)$submode)));
+
+    // ADIF MODE ATV is Amateur Television. DATV is commonly logged as ATV,
+    // or as MODE/SUBMODE DATV even though DATV is not an official ADIF submode.
+    if (in_array($mode, array('ATV', 'DATV'), true)) {
+      return true;
+    }
+    if (in_array($submode, array('ATV', 'DATV'), true)) {
+      return true;
+    }
+    if (strpos($submode, 'DVB-S') === 0 || strpos($submode, 'DVBS') === 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private function remap_oscarwatch_mode($satellite, $sat_mode, $band, $band_rx, $qso_mode = '', $qso_submode = '')
   {
     $satellite_normalized = strtoupper(trim((string)$satellite));
     $sat_mode_normalized = strtoupper(trim((string)$sat_mode));
     $band_normalized = strtolower(trim((string)$band));
     $band_rx_normalized = strtolower(trim((string)$band_rx));
 
-    // QO-100 FTx from WSJT-X is almost always NB and often has no SAT_MODE.
+    // QO-100 NB vs WB is decided from ADIF MODE, and only when SAT_NAME is QO-100.
+    // Other satellites are never assumed to be QO-100, even if MODE is FT8/ATV/etc.
     if ($satellite_normalized === 'QO-100') {
-      if (in_array($sat_mode_normalized, array('WB', 'DATV', 'WIDEBAND', 'WIDEBAND DATV'), true)) {
+      if ($this->is_qo100_wideband_datv($qso_mode, $qso_submode)) {
         return 'Wideband DATV';
       }
       return 'Narrowband Transponder';
