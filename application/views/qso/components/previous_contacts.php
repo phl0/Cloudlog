@@ -1,4 +1,11 @@
-<div id="qso-last-table-content" hx-get="<?php echo site_url('/qso/component_past_contacts?page=' . (int)$current_page); ?>" hx-trigger="every 5s" hx-target="this" hx-swap="outerHTML" hx-vals='js:{_t: Date.now()}'>
+<?php
+  $station_id_param = '';
+  if (!empty($station_id)) {
+    $station_id_param = '&station_id=' . rawurlencode($station_id);
+  }
+  $past_contacts_base = site_url('/qso/component_past_contacts');
+?>
+<div id="qso-last-table-content" hx-get="<?php echo $past_contacts_base . '?page=' . (int)$current_page . $station_id_param; ?>" hx-trigger="every 5s" hx-target="this" hx-swap="outerHTML" hx-vals='js:{station_id: (document.getElementById("stationProfile") || {}).value || "", _t: Date.now()}'>
 
 <div class="table-responsive" style="font-size: 0.95rem;">
   <table class="table">
@@ -59,7 +66,7 @@
     <!-- Previous Button -->
     <li class="page-item <?php echo ($current_page == 0) ? 'disabled' : ''; ?>">
       <?php if ($current_page > 0): ?>
-        <a class="page-link" href="#" hx-get="<?php echo site_url('/qso/component_past_contacts?page=' . ($current_page - 1)); ?>" hx-target="#qso-last-table-content" hx-swap="outerHTML">
+        <a class="page-link" href="#" hx-get="<?php echo $past_contacts_base . '?page=' . ($current_page - 1) . $station_id_param; ?>" hx-target="#qso-last-table-content" hx-swap="outerHTML" hx-vals='js:{station_id: (document.getElementById("stationProfile") || {}).value || ""}'>
           <?php echo $prev_label; ?>
         </a>
       <?php else: ?>
@@ -87,7 +94,7 @@
         <?php if ($current_page == $i): ?>
           <span class="page-link"><?php echo $page_num; ?></span>
         <?php else: ?>
-          <a class="page-link" href="#" hx-get="<?php echo site_url('/qso/component_past_contacts?page=' . $i); ?>" hx-target="#qso-last-table-content" hx-swap="outerHTML">
+          <a class="page-link" href="#" hx-get="<?php echo $past_contacts_base . '?page=' . $i . $station_id_param; ?>" hx-target="#qso-last-table-content" hx-swap="outerHTML" hx-vals='js:{station_id: (document.getElementById("stationProfile") || {}).value || ""}'>
             <?php echo $page_num; ?>
           </a>
         <?php endif; ?>
@@ -101,7 +108,7 @@
     <!-- Next Button -->
     <li class="page-item <?php echo ($current_page >= $total_pages - 1) ? 'disabled' : ''; ?>">
       <?php if ($current_page < $total_pages - 1): ?>
-        <a class="page-link" href="#" hx-get="<?php echo site_url('/qso/component_past_contacts?page=' . ($current_page + 1)); ?>" hx-target="#qso-last-table-content" hx-swap="outerHTML">
+        <a class="page-link" href="#" hx-get="<?php echo $past_contacts_base . '?page=' . ($current_page + 1) . $station_id_param; ?>" hx-target="#qso-last-table-content" hx-swap="outerHTML" hx-vals='js:{station_id: (document.getElementById("stationProfile") || {}).value || ""}'>
           <?php echo $next_label; ?>
         </a>
       <?php else: ?>
@@ -126,7 +133,7 @@ function echo_table_col($row, $name) {
 		case 'WWFF':    echo '<td>' . ($row->COL_WWFF_REF) . '</td>'; break;
 		case 'POTA':    echo '<td>' . ($row->COL_POTA_REF) . '</td>'; break;
 		case 'Grid':    echo '<td>'; echoQrbCalcLink($row->COL_MY_GRIDSQUARE, $row->COL_VUCC_GRIDS, $row->COL_GRIDSQUARE); echo '</td>'; break;
-		case 'Distance':    echo '<td>' . ($row->COL_DISTANCE ? $row->COL_DISTANCE . '&nbsp;km' : '') . '</td>'; break;
+		case 'Distance':    echo '<td>' . qso_format_distance($row) . '</td>'; break;
 		case 'Band':    echo '<td>'; if($row->COL_SAT_NAME != null) { echo '<a href="https://db.satnogs.org/search/?q='.$row->COL_SAT_NAME.'" target="_blank">'.$row->COL_SAT_NAME.'</a></td>'; } else { echo strtolower($row->COL_BAND); } echo '</td>'; break;
 		case 'Frequency':    echo '<td>'; if($row->COL_SAT_NAME != null) { echo '<a href="https://db.satnogs.org/search/?q='.$row->COL_SAT_NAME.'" target="_blank">'.$row->COL_SAT_NAME.'</a></td>'; } else { if($row->COL_FREQ != null) { echo $ci->frequency->hz_to_mhz($row->COL_FREQ); } else { echo strtolower($row->COL_BAND); } } echo '</td>'; break;
 		case 'State':   echo '<td>' . ($row->COL_STATE) . '</td>'; break;

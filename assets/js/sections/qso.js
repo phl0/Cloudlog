@@ -190,9 +190,7 @@ function applyLookupLocator(result, approval) {
 	$('#locator').val(result.callsign_qra);
 	$('#locator_info').html(result.bearing);
 
-	if (result.callsign_distance != "" && result.callsign_distance != 0) {
-		document.getElementById("distance").value = result.callsign_distance;
-	}
+	updateQsoDistanceFromLocator(result.callsign_qra);
 
 	if (result.callsign_qra != "") {
 		if (result.confirmed) {
@@ -743,6 +741,8 @@ var favs={};
 		}
 		
 		if (_submit) {
+			updateQsoDistanceFromLocator($('#locator').val());
+
 			// Mark as submitting and disable the submit button
 			isSubmitting = true;
 			$('#qso_input .warningOnSubmit').hide();
@@ -770,20 +770,32 @@ var favs={};
 					if (response && response.status === 'ok') {
 						var savedCallsign = normalizeFieldValue($('#callsign').val()).toUpperCase();
 						var savedStartDate = normalizeFieldValue($('#qso_input [name="start_date"]').first().val());
+						var savedStartTime = normalizeFieldValue($('#qso_input [name="start_time"]').first().val());
+						var savedEndTime = normalizeFieldValue($('#qso_input [name="end_time"]').first().val());
 						var savedBand = normalizeFieldValue($('#band').val());
+						var savedBandRx = normalizeFieldValue($('#band_rx').val());
+						var savedFrequency = normalizeFieldValue($('#frequency').val());
+						var savedFrequencyRx = normalizeFieldValue($('#frequency_rx').val());
 						var savedMode = normalizeFieldValue($('#mode').val());
 						var savedSatName = normalizeFieldValue($('#sat_name').val());
 						var savedSatMode = normalizeFieldValue($('#sat_mode').val());
 						var savedPropMode = $('#selectPropagation').val();
 						var savedRadio = normalizeFieldValue($('#qso_input select[name="radio"]').val());
+						var savedStationProfile = normalizeFieldValue($('#stationProfile').val());
 						var postSaveDefaults = {
 							start_date: savedStartDate,
+							start_time: savedStartTime,
+							end_time: savedEndTime,
 							band: savedBand,
+							band_rx: savedBandRx,
+							frequency: savedFrequency,
+							frequency_rx: savedFrequencyRx,
 							mode: savedMode,
 							sat_name: savedSatName,
 							sat_mode: savedSatMode,
 							prop_mode: savedPropMode,
-							radio: savedRadio
+							radio: savedRadio,
+							station_profile: savedStationProfile
 						};
 						var saveMessage = (response && response.message) ? response.message : 'QSO Added';
 						if (savedCallsign && savedBand) {
@@ -816,7 +828,11 @@ var favs={};
 						showQsoNotice(saveMessage, 'info');
 
 						if (typeof htmx !== 'undefined' && document.getElementById('qso-last-table')) {
-							htmx.ajax('GET', base_url + 'index.php/qso/component_past_contacts', {
+							var pastContactsUrl = base_url + 'index.php/qso/component_past_contacts';
+							if (savedStationProfile) {
+								pastContactsUrl += '?station_id=' + encodeURIComponent(savedStationProfile);
+							}
+							htmx.ajax('GET', pastContactsUrl, {
 								target: '#qso-last-table',
 								swap: 'innerHTML'
 							});
@@ -1208,6 +1224,10 @@ function reset_fields() {
 	resetCallsignLookupState();
 
 	$('#locator_info').text("");
+	var distanceEl = document.getElementById("distance");
+	if (distanceEl) {
+		distanceEl.value = '0';
+	}
 	$('#country').val("");
 	$('#continent').val("");
 	$('#lotw_info').text("");
@@ -1283,9 +1303,20 @@ function reapplyPostSaveDefaults(defaults) {
 
 	var selectedRadioForReset = normalizeFieldValue(defaults.radio || $('select.radios').first().val());
 	var hasSelectedRadioForReset = selectedRadioForReset !== '' && selectedRadioForReset !== '0';
+	var isPostMode = (typeof qso_manual !== 'undefined') && (String(qso_manual) === '1');
 
 	if (typeof defaults.start_date !== 'undefined') {
 		$('#qso_input [name="start_date"]').val(defaults.start_date);
+	}
+
+	// POST mode: keep the entered time between consecutive QSOs (matches pre-AJAX session restore).
+	if (isPostMode) {
+		if (typeof defaults.start_time !== 'undefined') {
+			$('#qso_input [name="start_time"]').val(defaults.start_time);
+		}
+		if (typeof defaults.end_time !== 'undefined' && $('#qso_input [name="end_time"]').length) {
+			$('#qso_input [name="end_time"]').val(defaults.end_time);
+		}
 	}
 
 	if (typeof defaults.band !== 'undefined') {
@@ -1296,12 +1327,29 @@ function reapplyPostSaveDefaults(defaults) {
 		$('#mode').val(defaults.mode);
 	}
 
+	if (typeof defaults.station_profile !== 'undefined' && defaults.station_profile !== '') {
+		$('#stationProfile').val(defaults.station_profile);
+	}
+
 	if (!hasSelectedRadioForReset && typeof defaults.sat_name !== 'undefined') {
 		$('#sat_name').val(defaults.sat_name);
 	}
 
 	if (!hasSelectedRadioForReset && typeof defaults.sat_mode !== 'undefined') {
 		$('#sat_mode').val(defaults.sat_mode);
+	}
+
+	// Without CAT, keep frequency/RX band between entries like the old full-page reload did.
+	if (!hasSelectedRadioForReset) {
+		if (typeof defaults.frequency !== 'undefined') {
+			$('#frequency').val(defaults.frequency);
+		}
+		if (typeof defaults.frequency_rx !== 'undefined') {
+			$('#frequency_rx').val(defaults.frequency_rx);
+		}
+		if (typeof defaults.band_rx !== 'undefined') {
+			$('#band_rx').val(defaults.band_rx);
+		}
 	}
 
 	if (typeof defaults.radio !== 'undefined' && defaults.radio !== '') {
@@ -1824,6 +1872,23 @@ $('#band').change(function() {
 var locatorDebounceTimer = null;
 var qsoLocatorGridLayer = null;
 
+function updateQsoDistanceFromLocator(locatorValue) {
+	var distanceEl = document.getElementById("distance");
+	if (!distanceEl) {
+		return;
+	}
+
+	var qra_input = (locatorValue || '').trim();
+	var myGrid = (typeof station_gridsquares !== 'undefined') ? station_gridsquares[$('#stationProfile').val()] : null;
+	if (!qra_input || qra_input.length < 4 || !myGrid || typeof QraUtils === 'undefined' || typeof QraUtils.distanceKm !== 'function') {
+		distanceEl.value = '0';
+		return;
+	}
+
+	var dist = QraUtils.distanceKm(myGrid, qra_input);
+	distanceEl.value = dist !== null ? dist : '0';
+}
+
 function updateQsoLocatorGridOverlays(locatorValue, fitIfMultiple) {
 	if (typeof mymap === 'undefined' || !mymap || typeof QraUtils === 'undefined' || typeof QraUtils.drawLocatorGrids !== 'function') {
 		return;
@@ -1919,10 +1984,8 @@ $("#locator").on('keyup input', function(){
 				if (bearingStr) {
 					$('#locator_info').html(bearingStr).fadeIn("slow");
 				}
-
-				var dist = QraUtils.distanceKm(myGrid, qra_input);
-				document.getElementById("distance").value = dist !== null ? dist : '';
 			}
+			updateQsoDistanceFromLocator(qra_input);
 		} else {
 			updateQsoLocatorGridOverlays('');
 		}
